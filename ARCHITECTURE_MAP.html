@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ParentNinja — UI Architecture Map</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --dark:       #1A1A2E;
+    --dark-mid:   #16213E;
+    --dark-card:  #0F3460;
+    --gold:       #C9A84C;
+    --gold-light: #F0C96A;
+    --light-bg:   #F7F7FA;
+    --light-card: #FFFFFF;
+    --text-dark:  #1A1A2E;
+    --text-muted: #6B7280;
+    --green:      #22C55E;
+    --amber:      #F59E0B;
+    --red:        #EF4444;
+    --blue:       #3B82F6;
+    --border:     #E5E7EB;
+    --radius:     12px;
+    --shadow:     0 2px 12px rgba(26,26,46,0.08);
+    --shadow-md:  0 4px 24px rgba(26,26,46,0.14);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--light-bg);
+    color: var(--text-dark);
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ────────────────────────────────── */
+  .site-header {
+    background: var(--dark);
+    padding: 48px 32px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 50%, rgba(201,168,76,0.12) 0%, transparent 70%);
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .header-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .header-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .header-title span { color: var(--gold); }
+  .header-sub {
+    font-size: 15px;
+    color: rgba(255,255,255,0.55);
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+  .header-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .meta-pill {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    font-weight: 500;
+  }
+
+  /* ── PROGRESS OVERVIEW ──────────────────────── */
+  .overview-bar {
+    background: var(--dark-mid);
+    padding: 24px 32px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .overview-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .overview-label {
+    color: rgba(255,255,255,0.4);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-right: 8px;
+  }
+  .stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: white;
+    font-weight: 500;
+  }
+  .stat-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .stat-dot.green { background: var(--green); }
+  .stat-dot.amber { background: var(--amber); }
+  .stat-dot.red   { background: var(--red);   }
+
+  /* ── NAV ─────────────────────────────────────── */
+  .sticky-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(247,247,250,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+  }
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-inner::-webkit-scrollbar { display: none; }
+  .nav-link {
+    display: block;
+    padding: 14px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .nav-link:hover {
+    color: var(--dark);
+    border-color: var(--gold);
+  }
+
+  /* ── MAIN LAYOUT ─────────────────────────────── */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+
+  /* ── SECTION ─────────────────────────────────── */
+  .section {
+    margin-bottom: 48px;
+  }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-number {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  /* ── APP STRUCTURE DIAGRAM ─────────────────── */
+  .app-tree {
+    background: var(--dark);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .app-tree::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%);
+  }
+  .app-tree-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+  .tree-root {
+    font-family: monospace;
+    font-size: 14px;
+    color: rgba(255,255,255,0.9);
+    line-height: 1.9;
+    position: relative;
+    z-index: 1;
+  }
+  .tree-node {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .tree-icon { font-size: 16px; }
+  .tree-name { color: #FFFFFF; font-weight: 600; font-family: 'Inter', sans-serif; font-size: 14px; }
+  .tree-desc { color: rgba(255,255,255,0.35); font-family: 'Inter', sans-serif; font-size: 12px; margin-left: 4px; }
+  .tree-connector { color: rgba(201,168,76,0.5); user-select: none; }
+
+  /* Tab screens row */
+  .tab-bar-visual {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .tab-chip {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.8);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .tab-chip.missing {
+    border-color: rgba(239,68,68,0.35);
+    color: rgba(255,255,255,0.45);
+    background: rgba(239,68,68,0.06);
+  }
+  .tab-chip .tab-num {
+    background: rgba(201,168,76,0.2);
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-family: 'Cinzel', serif;
+  }
+  .tab-chip.missing .tab-num {
+    background: rgba(239,68,68,0.15);
+    color: var(--red);
+  }
+
+  /* ── SCREEN BLOCK ────────────────────────────── */
+  .screen-block {
+    background: var(--light-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .screen-block.missing-screen {
+    border-color: rgba(239,68,68,0.25);
+    background: #FFF9F9;
+  }
+  .screen-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 24px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: background 0.15s;
+  }
+  .screen-head:hover { background: rgba(26,26,46,0.02); }
+  .screen-head.open { border-bottom-color: var(--border); }
+  .screen-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: var(--dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .missing-screen .screen-icon { background: #FECACA; }
+  .screen-head-text { flex: 1; min-width: 0; }
+  .screen-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark);
+  }
+  .screen-purpose {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  .screen-badges {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge.built   { background: #DCFCE7; color: #166534; }
+  .badge.missing { background: #FEE2E2; color: #991B1B; }
+  .badge.partial { background: #FEF3C7; color: #92400E; }
+  .badge.gap-count { background: #F3F4F6; color: var(--text-muted); }
+
+  .chevron {
+    color: var(--text-muted);
+    font-size: 14px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .screen-head.open .chevron { transform: rotate(180deg); }
+
+  .screen-body { display: none; padding: 24px; }
+  .screen-body.open { display: block; }
+
+  /* sub-section label */
+  .sub-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 20px 0 10px;
+  }
+  .sub-label:first-child { margin-top: 0; }
+
+  /* integration note */
+  .integration-note {
+    background: #EFF6FF;
+    border-left: 3px solid var(--blue);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #1E3A8A;
+    margin-top: 12px;
+  }
+
+  /* ── TABLES ──────────────────────────────────── */
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  .comp-table th {
+    text-align: left;
+    padding: 9px 12px;
+    background: var(--light-bg);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--border);
+  }
+  .comp-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #F3F4F6;
+    vertical-align: top;
+  }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:hover td { background: rgba(26,26,46,0.015); }
+
+  /* status cells */
+  .st-built   { color: #15803D; font-weight: 600; }
+  .st-partial { color: #B45309; font-weight: 600; }
+  .st-missing { color: #DC2626; font-weight: 600; }
+
+  .comp-name { font-weight: 600; color: var(--dark); }
+  .comp-desc { color: var(--text-muted); }
+
+  /* ── GAPS TABLE ─────────────────────────────── */
+  .gaps-section {
+    background: var(--light-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .gaps-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  .priority-badge {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .priority-badge.critical { background: #FEE2E2; }
+  .priority-badge.high     { background: #FFEDD5; }
+  .priority-badge.medium   { background: #FEF9C3; }
+  .priority-badge.polish   { background: #DCFCE7; }
+
+  .gaps-title { font-size: 16px; font-weight: 700; }
+  .gaps-subtitle { font-size: 13px; color: var(--text-muted); margin-left: auto; }
+
+  .gaps-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  .gaps-table th {
+    text-align: left;
+    padding: 9px 16px;
+    background: var(--light-bg);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--border);
+  }
+  .gaps-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid #F3F4F6;
+    vertical-align: top;
+  }
+  .gaps-table tr:last-child td { border-bottom: none; }
+  .gaps-table tr:hover td { background: rgba(26,26,46,0.015); }
+
+  .gap-id {
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 5px;
+  }
+  .gap-id.c { background: #FEE2E2; color: #991B1B; }
+  .gap-id.h { background: #FFEDD5; color: #9A3412; }
+  .gap-id.m { background: #FEF9C3; color: #713F12; }
+  .gap-id.p { background: #DCFCE7; color: #166534; }
+
+  .gap-title { font-weight: 600; color: var(--dark); }
+  .gap-screen {
+    display: inline-block;
+    background: #F3F4F6;
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .gap-notes { color: var(--text-muted); font-size: 13px; }
+
+  /* ── DATA MODEL ─────────────────────────────── */
+  .data-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+  }
+  .entity-card {
+    background: var(--light-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .entity-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--dark);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .entity-name::before {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+  .entity-fields {
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+  .entity-source {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--blue);
+    font-weight: 500;
+  }
+
+  /* ── FLOWS ───────────────────────────────────── */
+  .flow-diagram {
+    background: var(--dark);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    font-family: monospace;
+    font-size: 13px;
+    color: rgba(255,255,255,0.8);
+    line-height: 2;
+    overflow-x: auto;
+  }
+  .flow-screen {
+    color: var(--gold-light);
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+  }
+  .flow-action {
+    color: rgba(255,255,255,0.5);
+    font-size: 12px;
+  }
+  .flow-warn { color: #FCA5A5; }
+  .flow-arrow { color: var(--gold); }
+
+  /* ── SUMMARY TABLE ─────────────────────────── */
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background: var(--light-card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .summary-table th {
+    background: var(--dark);
+    color: rgba(255,255,255,0.7);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 12px 18px;
+    text-align: left;
+  }
+  .summary-table td {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .summary-table tr:last-child td { border-bottom: none; }
+  .summary-table .screen-cell { font-weight: 700; color: var(--dark); }
+  .summary-table .screen-cell.not-built { color: var(--red); }
+  .total-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .gap-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .gap-pill.crit { background: #FEE2E2; color: #991B1B; }
+  .gap-pill.total { background: #F3F4F6; color: var(--text-muted); }
+
+  /* ── INTEGRATION DEPS ──────────────────────── */
+  .dep-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .dep-card {
+    background: var(--light-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    border-left: 3px solid var(--gold);
+  }
+  .dep-title { font-weight: 700; font-size: 14px; color: var(--dark); margin-bottom: 6px; }
+  .dep-touch { font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px; }
+  .dep-link {
+    font-size: 11.5px;
+    color: var(--blue);
+    font-weight: 600;
+    font-family: monospace;
+    background: #EFF6FF;
+    padding: 2px 7px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+
+  /* ── BUILD ORDER ─────────────────────────────── */
+  .phases {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 16px;
+  }
+  .phase-card {
+    border-radius: var(--radius);
+    padding: 20px;
+    border: 1px solid var(--border);
+  }
+  .phase-card.a { background: #FEF2F2; border-color: #FECACA; }
+  .phase-card.b { background: #FFF7ED; border-color: #FED7AA; }
+  .phase-card.c { background: #FFFBEB; border-color: #FDE68A; }
+  .phase-card.d { background: #F0FDF4; border-color: #BBF7D0; }
+  .phase-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+  }
+  .phase-card.a .phase-title { color: #991B1B; }
+  .phase-card.b .phase-title { color: #9A3412; }
+  .phase-card.c .phase-title { color: #92400E; }
+  .phase-card.d .phase-title { color: #166534; }
+  .phase-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+  .phase-items { list-style: none; }
+  .phase-items li {
+    font-size: 13px;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: #374151;
+  }
+  .phase-items li:last-child { border-bottom: none; }
+  .phase-items li::before {
+    content: counter(item, decimal-leading-zero);
+    counter-increment: item;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .phase-card.a .phase-items li::before { color: #DC2626; }
+  .phase-card.b .phase-items li::before { color: #EA580C; }
+  .phase-card.c .phase-items li::before { color: #D97706; }
+  .phase-card.d .phase-items li::before { color: #16A34A; }
+  .phases { counter-reset: item; }
+  .phase-card { counter-reset: item; }
+
+  /* ── FOOTER ─────────────────────────────────── */
+  .site-footer {
+    background: var(--dark);
+    padding: 24px 32px;
+    text-align: center;
+    font-size: 12px;
+    color: rgba(255,255,255,0.3);
+  }
+  .site-footer strong { color: var(--gold); }
+
+  /* ── MISC ────────────────────────────────────── */
+  .prose {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 720px;
+    margin-bottom: 18px;
+  }
+  code {
+    background: #F3F4F6;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--dark-card);
+  }
+
+  /* responsive */
+  @media (max-width: 640px) {
+    .site-header { padding: 32px 20px 28px; }
+    .main { padding: 24px 16px 60px; }
+    .sticky-nav { padding: 0 16px; }
+    .overview-bar { padding: 16px 20px; }
+    .phases, .dep-grid, .data-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <p class="header-eyebrow">Ninja Learning App</p>
+    <h1 class="header-title">Parent<span>Ninja</span><br>UI Architecture Map</h1>
+    <p class="header-sub">Full screen inventory · Gap analysis · Integration roadmap</p>
+    <div class="header-meta">
+      <span class="meta-pill">Generated: 2026-03-30</span>
+      <span class="meta-pill">Stage 1 → Integration-Ready</span>
+      <span class="meta-pill">v1.3 prototype + UI Spec v1.0</span>
+    </div>
+  </div>
+</header>
+
+<!-- OVERVIEW BAR -->
+<div class="overview-bar">
+  <div class="overview-inner">
+    <span class="overview-label">Screen Status</span>
+    <div class="stat-chip"><span class="stat-dot green"></span>6 Core screens built</div>
+    <div class="stat-chip"><span class="stat-dot red"></span>3 Screens not yet built</div>
+    <div class="stat-chip"><span class="stat-dot amber"></span>10 Critical gaps</div>
+    <div class="stat-chip"><span class="stat-dot amber"></span>14 High priority gaps</div>
+    <div class="stat-chip"><span class="stat-dot green"></span>15 Medium + Polish items</div>
+  </div>
+</div>
+
+<!-- STICKY NAV -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <a href="#structure" class="nav-link">1. Structure</a>
+    <a href="#screens" class="nav-link">2. Screens</a>
+    <a href="#flows" class="nav-link">3. Nav Flows</a>
+    <a href="#data" class="nav-link">4. Data Model</a>
+    <a href="#gaps" class="nav-link">5. Gap Analysis</a>
+    <a href="#summary" class="nav-link">6. Summary</a>
+    <a href="#deps" class="nav-link">7. Integration</a>
+    <a href="#build" class="nav-link">8. Build Order</a>
+  </div>
+</nav>
+
+<main class="main">
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 1. APP STRUCTURE -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="section" id="structure">
+    <div class="section-header">
+      <span class="section-number">01</span>
+      <h2 class="section-title">App-Level Structure</h2>
+    </div>
+
+    <div class="app-tree">
+      <p class="app-tree-label">Application Hierarchy</p>
+      <div class="tree-root">
+        <div class="tree-node">
+          <span class="tree-icon">⛩️</span>
+          <span class="tree-name">ParentNinja</span>
+        </div>
+        <div style="padding-left: 28px; border-left: 1px solid rgba(201,168,76,0.2); margin-left: 8px; margin-top: 4px;">
+          <div class="tree-node" style="margin: 6px 0;">
+            <span class="tree-connector">├──</span>
+            <span class="tree-icon">🔒</span>
+            <span class="tree-name">LOCK SCREEN</span>
+            <span class="tree-desc">← entry point (unauthenticated)</span>
+          </div>
+          <div class="tree-node" style="margin: 6px 0;">
+            <span class="tree-connector">└──</span>
+            <span class="tree-name" style="color: var(--gold-light);">AUTHENTICATED APP</span>
+          </div>
+          <div style="padding-left: 28px; border-left: 1px solid rgba(201,168,76,0.15); margin-left: 36px; margin-top: 4px;">
+            <div class="tree-node" style="margin: 5px 0;">
+              <span class="tree-connector">├──</span><span class="tree-icon">🏠</span>
+              <span class="tree-name">HOME</span><span class="tree-desc">← tab 1 (default)</span>
+            </div>
+            <div class="tree-node" style="margin: 5px 0;">
+              <span class="tree-connector">├──</span><span class="tree-icon">📋</span>
+              <span class="tree-name">ATTENDANCE</span><span class="tree-desc">← tab 2</span>
+            </div>
+            <div class="tree-node" style="margin: 5px 0;">
+              <span class="tree-connector">├──</span><span class="tree-icon">👨‍👩‍👧</span>
+              <span class="tree-name">FAMILY ACCOUNT</span><span class="tree-desc">← tab 3</span>
+            </div>
+            <div class="tree-node" style="margin: 5px 0;">
+              <span class="tree-connector">├──</span><span class="tree-icon">💳</span>
+              <span class="tree-name">BILLING</span><span class="tree-desc">← tab 4</span>
+            </div>
+            <div class="tree-node" style="margin: 5px 0;">
+              <span class="tree-connector">└──</span><span class="tree-icon">🛍️</span>
+              <span class="tree-name">SHOP</span><span class="tree-desc">← tab 5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="prose">Navigation pattern: persistent bottom tab bar (5 items). All screens sit at the same depth — no deep nesting in v1.3. Modals and slide-in panels provide sub-interactions without full screen pushes.</p>
+
+    <div style="margin-top: 16px;">
+      <p style="font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">All screens at a glance</p>
+      <div class="tab-bar-visual">
+        <div class="tab-chip"><span class="tab-num">1</span>🔒 Lock Screen</div>
+        <div class="tab-chip"><span class="tab-num">2</span>🏠 Home</div>
+        <div class="tab-chip"><span class="tab-num">3</span>📋 Attendance</div>
+        <div class="tab-chip"><span class="tab-num">4</span>👨‍👩‍👧 Family Account</div>
+        <div class="tab-chip"><span class="tab-num">5</span>💳 Billing</div>
+        <div class="tab-chip"><span class="tab-num">6</span>🛍️ Shop</div>
+        <div class="tab-chip missing"><span class="tab-num">✕</span>🧑‍🎓 Student Profile</div>
+        <div class="tab-chip missing"><span class="tab-num">✕</span>⚙️ Settings</div>
+        <div class="tab-chip missing"><span class="tab-num">✕</span>💬 Messaging</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 2. SCREENS -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="section" id="screens">
+    <div class="section-header">
+      <span class="section-number">02</span>
+      <h2 class="section-title">Screen-by-Screen Inventory</h2>
+    </div>
+
+    <!-- LOCK SCREEN -->
+    <div class="screen-block">
+      <div class="screen-head" onclick="toggleScreen(this)">
+        <div class="screen-icon">🔒</div>
+        <div class="screen-head-text">
+          <div class="screen-name">2.1 — Lock Screen</div>
+          <div class="screen-purpose">Family authentication gate before entering the app</div>
+        </div>
+        <div class="screen-badges">
+          <span class="badge built">✓ Core UI built</span>
+          <span class="badge gap-count">5 gaps</span>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="screen-body open">
+        <p class="sub-label">Components</p>
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Family name display</td><td class="comp-desc">Shows family surname at top</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Student tiles</td><td class="comp-desc">One per child — name, age, belt name, belt colour dot</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Passcode numpad</td><td class="comp-desc">4-digit entry with dot indicators</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Wrong passcode feedback</td><td class="comp-desc">Dots flash red, clear after 700ms</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Passcode lockout</td><td class="comp-desc">Lockout after N failed attempts</td><td class="st-missing">❌ Missing (Phase 2 flag)</td></tr>
+            <tr><td class="comp-name">Biometric auth</td><td class="comp-desc">Face ID / Touch ID shortcut</td><td class="st-missing">❌ Missing</td></tr>
+            <tr><td class="comp-name">"Forgot passcode" flow</td><td class="comp-desc">Recovery path</td><td class="st-missing">❌ Missing</td></tr>
+            <tr><td class="comp-name">Stripe detail on tiles</td><td class="comp-desc">Element badges on lock screen tiles</td><td class="st-missing">❌ Missing</td></tr>
+            <tr><td class="comp-name">Session timeout / auto-lock</td><td class="comp-desc">Re-show lock screen after inactivity</td><td class="st-missing">❌ Missing</td></tr>
+          </tbody>
+        </table>
+        <div class="integration-note">⚠️ No real auth handshake. Currently accepts any passcode with no backend validation. Session management entirely absent.</div>
+      </div>
+    </div>
+
+    <!-- HOME -->
+    <div class="screen-block">
+      <div class="screen-head" onclick="toggleScreen(this)">
+        <div class="screen-icon">🏠</div>
+        <div class="screen-head-text">
+          <div class="screen-name">2.2 — Home Screen</div>
+          <div class="screen-purpose">Family overview — child progress at a glance, pending actions, notifications</div>
+        </div>
+        <div class="screen-badges">
+          <span class="badge built">✓ Core UI built</span>
+          <span class="badge gap-count">8 gaps</span>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="screen-body">
+        <p class="sub-label">Dark Hero Section — <code>#1A1A2E</code></p>
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Greeting eyebrow</td><td class="comp-desc">"Good morning," + first name</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Family name header</td><td class="comp-desc">Large display heading</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Current date + term name</td><td class="comp-desc">Formatted date string + "Spring Term 2026"</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Notification bell</td><td class="comp-desc">Gold tint when unread; red count badge</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Term strip</td><td class="comp-desc">3-stat bar (sessions, stripes, challenges) — Cinzel numerals</td><td class="st-built">✅ Built</td></tr>
+          </tbody>
+        </table>
+
+        <p class="sub-label">Student Overview Cards — <code>#F7F7FA</code></p>
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Student card</td><td class="comp-desc">Name, age, belt, element stripe badges (28px SVG, Air·Earth·Water·Fire order)</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Belt label</td><td class="comp-desc">Colour-coded belt name</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Stripe badges</td><td class="comp-desc">Full / Half / Ghost states per element</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Tappable card → Student Profile</td><td class="comp-desc">Deep-link to full student profile</td><td class="st-partial">⚠️ Wired up but Student Profile not built</td></tr>
+            <tr><td class="comp-name">"Inactive" student state</td><td class="comp-desc">Distinct visual for paused students</td><td class="st-partial">⚠️ Status field exists, visual not confirmed</td></tr>
+          </tbody>
+        </table>
+
+        <p class="sub-label">Challenge Banner</p>
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Challenge banner</td><td class="comp-desc">Persistent — non-dismissible except by action</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">"Set Challenge" + textarea</td><td class="comp-desc">Expands inline for parent to enter description</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">"Mark Complete" button</td><td class="comp-desc">Sets challenge_confirmed = true, banner fades</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Push notification on completion</td><td class="comp-desc">Fires to parent and instructor</td><td class="st-missing">❌ Not wired (backend dependency)</td></tr>
+            <tr><td class="comp-name">Banner hidden state</td><td class="comp-desc">What shows when no challenge is pending</td><td class="st-missing">❌ Not defined</td></tr>
+          </tbody>
+        </table>
+
+        <p class="sub-label">Notifications Panel (slide-in overlay)</p>
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Full-height panel</td><td class="comp-desc">Slides in from right on bell tap</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Notification feed + filter chips</td><td class="comp-desc">Chronological; filter by type</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Unread styling</td><td class="comp-desc">Gold background + gold dot on unread rows</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Inline action buttons</td><td class="comp-desc">"Set Challenge" / "Mark Complete" within feed</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Soft read flag</td><td class="comp-desc">read_at timestamp set on tap; never deleted</td><td class="st-built">✅ Specified</td></tr>
+            <tr><td class="comp-name">Notification preferences</td><td class="comp-desc">Which types can be toggled off</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Empty state</td><td class="comp-desc">"No notifications yet" view</td><td class="st-missing">❌ Not defined</td></tr>
+            <tr><td class="comp-name">Real-time push delivery</td><td class="comp-desc">Websocket / push integration</td><td class="st-missing">❌ Missing</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE -->
+    <div class="screen-block">
+      <div class="screen-head" onclick="toggleScreen(this)">
+        <div class="screen-icon">📋</div>
+        <div class="screen-head-text">
+          <div class="screen-name">2.3 — Attendance Screen</div>
+          <div class="screen-purpose">Report attendance, book make-up sessions, review history</div>
+        </div>
+        <div class="screen-badges">
+          <span class="badge built">✓ Core UI built</span>
+          <span class="badge gap-count">10 gaps</span>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="screen-body">
+        <p class="sub-label">Today's Classes (Hero)</p>
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Class card</td><td class="comp-desc">Student name, class name, instructor, time</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Attending / Absent / Late buttons</td><td class="comp-desc">Colour-coded; highlights on tap + confirmation message</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Instructor notified on tap</td><td class="comp-desc">Backend event trigger</td><td class="st-missing">❌ Not wired</td></tr>
+            <tr><td class="comp-name">Already-reported guard</td><td class="comp-desc">Disable buttons once reported; prevent duplicates</td><td class="st-partial">⚠️ Not confirmed — risk of duplicate reports</td></tr>
+            <tr><td class="comp-name">No classes today state</td><td class="comp-desc">Rest day / empty message</td><td class="st-missing">❌ Not defined</td></tr>
+          </tbody>
+        </table>
+
+        <p class="sub-label">Tab: Upcoming</p>
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Upcoming classes list</td><td class="comp-desc">Date, time, class name, student, instructor</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Calendar view option</td><td class="comp-desc">Alternative to list view</td><td class="st-missing">❌ Missing</td></tr>
+          </tbody>
+        </table>
+
+        <p class="sub-label">Tab: Make-Up Classes</p>
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Make-up allowance pips</td><td class="comp-desc">4/term; blue = healthy, amber = 1 remaining</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Age-appropriate class list</td><td class="comp-desc">Space indicators (green / amber); 30+ capacity filtered out</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Confirm button</td><td class="comp-desc">Context-aware disabled until selection</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Zero allowance state</td><td class="comp-desc">All pips gone — booking blocked</td><td class="st-partial">⚠️ Visual spec'd; enforcement unconfirmed</td></tr>
+            <tr><td class="comp-name">Date picker for make-up</td><td class="comp-desc">Choose which date to attend the class</td><td class="st-missing">❌ Missing — no date selection at all</td></tr>
+            <tr><td class="comp-name">Backend booking record</td><td class="comp-desc">absence_id, student_id, class_id, term_id, confirmed_at</td><td class="st-missing">❌ Not wired</td></tr>
+          </tbody>
+        </table>
+
+        <p class="sub-label">Tab: History</p>
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Chronological session list</td><td class="comp-desc">All students; grouped by month</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Status pills</td><td class="comp-desc">Present (green) / Absent (grey) / Make-Up (amber)</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Filter by student</td><td class="comp-desc">Show one child's history</td><td class="st-missing">❌ Missing</td></tr>
+            <tr><td class="comp-name">Export (PDF/CSV)</td><td class="comp-desc">Attendance history download</td><td class="st-missing">❌ Missing</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FAMILY ACCOUNT -->
+    <div class="screen-block">
+      <div class="screen-head" onclick="toggleScreen(this)">
+        <div class="screen-icon">👨‍👩‍👧</div>
+        <div class="screen-head-text">
+          <div class="screen-name">2.4 — Family Account Screen</div>
+          <div class="screen-purpose">Manage students, guardians, consent documents, class transfers</div>
+        </div>
+        <div class="screen-badges">
+          <span class="badge built">✓ Core UI built</span>
+          <span class="badge gap-count">12 gaps</span>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="screen-body">
+        <p class="sub-label">Tab: Students</p>
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Student management cards</td><td class="comp-desc">Name, age, belt, class, membership type</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">"View Profile" action</td><td class="comp-desc">Navigates to Student Profile</td><td class="st-partial">⚠️ Wired up — Student Profile not built</td></tr>
+            <tr><td class="comp-name">"Pause" + confirmation dialog</td><td class="comp-desc">Soft pause, place held 8 weeks</td><td class="st-partial">✅ UI built; backend not wired</td></tr>
+            <tr><td class="comp-name">"Add New Student" + form</td><td class="comp-desc">Dashed CTA → inline form (name, DOB, class)</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Consent notice</td><td class="comp-desc">Shown during enrolment; consent gates activation</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Enrolment request wiring</td><td class="comp-desc">Creates pending record; notifies family + admin</td><td class="st-missing">❌ Not wired</td></tr>
+            <tr><td class="comp-name">Edit existing student details</td><td class="comp-desc">Change name, DOB, class preference</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Student re-activate (un-pause)</td><td class="comp-desc">Resume a paused student</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Student removal / unenrol</td><td class="comp-desc">Full exit flow</td><td class="st-missing">❌ Not built</td></tr>
+          </tbody>
+        </table>
+
+        <p class="sub-label">Tab: Account</p>
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Guardian chips</td><td class="comp-desc">Initials avatar, name, role (Primary / Guardian)</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Consent documents section</td><td class="comp-desc">Data Consent, Photo Permission, Medical Info — signed date + pill</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">"Edit Details" form</td><td class="comp-desc">Name, email, phone, emergency contact, notification pref</td><td class="st-partial">⚠️ Action visible; form not fully built</td></tr>
+            <tr><td class="comp-name">"Change Passcode" flow</td><td class="comp-desc">Updates family passcode</td><td class="st-partial">⚠️ Referenced; implementation unclear</td></tr>
+            <tr><td class="comp-name">Re-sign / update consent</td><td class="comp-desc">Refresh flow for expired consents</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Notification preferences</td><td class="comp-desc">Toggle which notification types are received</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Add / remove second guardian</td><td class="comp-desc">Invite a co-guardian; manage access</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Role-based access control</td><td class="comp-desc">Differentiate Primary vs Guardian permissions</td><td class="st-missing">❌ Not built</td></tr>
+          </tbody>
+        </table>
+
+        <p class="sub-label">Tab: Class Transfer</p>
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Student selector + class list</td><td class="comp-desc">Age-appropriate, in-space classes auto-populate</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Reason text field + submit</td><td class="comp-desc">Optional free text; request notifies instructor</td><td class="st-partial">✅ UI built; backend not wired</td></tr>
+            <tr><td class="comp-name">Pending transfer state</td><td class="comp-desc">Show transfer awaiting instructor approval</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Transfer approved / rejected</td><td class="comp-desc">Outcome notification to parent</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Transfer history</td><td class="comp-desc">Log of past class moves</td><td class="st-missing">❌ Not built</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- BILLING -->
+    <div class="screen-block">
+      <div class="screen-head" onclick="toggleScreen(this)">
+        <div class="screen-icon">💳</div>
+        <div class="screen-head-text">
+          <div class="screen-name">2.5 — Billing Screen</div>
+          <div class="screen-purpose">View membership costs, payment method, and payment history</div>
+        </div>
+        <div class="screen-badges">
+          <span class="badge built">✓ Core UI built</span>
+          <span class="badge gap-count">8 gaps</span>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="screen-body">
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Monthly total card</td><td class="comp-desc">Dark ink card, total family cost</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Per-student breakdown</td><td class="comp-desc">Membership tier per student</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Payment method display</td><td class="comp-desc">Masked last-4 digits + expiry only (no raw card data)</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Payment history list</td><td class="comp-desc">Chronological, amount + date</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Upgrade / Pause / Cancel actions</td><td class="comp-desc">Buttons visible; flows not built</td><td class="st-partial">⚠️ Buttons visible; flows not fully built</td></tr>
+            <tr><td class="comp-name">Upcoming payment preview</td><td class="comp-desc">Next charge date + amount</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Failed payment alert + recovery</td><td class="comp-desc">Alert + update card flow</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">"Update card" action</td><td class="comp-desc">Replace saved payment method</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Invoice download</td><td class="comp-desc">PDF per payment</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Stripe live integration</td><td class="comp-desc">All card handling via Stripe tokens</td><td class="st-missing">❌ Not wired</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SHOP -->
+    <div class="screen-block">
+      <div class="screen-head" onclick="toggleScreen(this)">
+        <div class="screen-icon">🛍️</div>
+        <div class="screen-head-text">
+          <div class="screen-name">2.6 — Shop Screen</div>
+          <div class="screen-purpose">Browse merchandise, camps, residencies, and learning materials</div>
+        </div>
+        <div class="screen-badges">
+          <span class="badge built">✓ Core UI built</span>
+          <span class="badge gap-count">7 gaps</span>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="screen-body">
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Category filter chips</td><td class="comp-desc">All / Merchandise / Camps / Residencies / Learning</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">2-column product grid</td><td class="comp-desc">Emoji thumbnail, name, description, price, CTA</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">CTA variants</td><td class="comp-desc">Add to basket / Book Now / Register Interest / Subscribe</td><td class="st-built">✅ Built</td></tr>
+            <tr><td class="comp-name">Product detail view</td><td class="comp-desc">Expanded product page</td><td class="st-missing">❌ Missing</td></tr>
+            <tr><td class="comp-name">Basket / cart</td><td class="comp-desc">Collect items before checkout</td><td class="st-missing">❌ Missing</td></tr>
+            <tr><td class="comp-name">Checkout flow</td><td class="comp-desc">Payment, confirmation, receipt</td><td class="st-missing">❌ Missing (Phase 1 illustrative)</td></tr>
+            <tr><td class="comp-name">Order history</td><td class="comp-desc">Past purchases</td><td class="st-missing">❌ Missing</td></tr>
+            <tr><td class="comp-name">"Register Interest" flow</td><td class="comp-desc">Capture email for waitlisted items</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Camp booking flow</td><td class="comp-desc">Date selection, student assignment, consent</td><td class="st-missing">❌ Missing</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- STUDENT PROFILE (MISSING) -->
+    <div class="screen-block missing-screen">
+      <div class="screen-head" onclick="toggleScreen(this)">
+        <div class="screen-icon">🧑‍🎓</div>
+        <div class="screen-head-text">
+          <div class="screen-name">2.7 — Student Profile</div>
+          <div class="screen-purpose">Full view of individual student progress, belt history, session log, instructor notes</div>
+        </div>
+        <div class="screen-badges">
+          <span class="badge built">✓ Built (v1.5)</span>
+          <span class="badge gap-count">1 component gap</span>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="screen-body">
+        <div class="integration-note" style="background: #F0FDF4; border-color: var(--green); color: #166534; margin-bottom: 16px;">
+          ✅ Student Profile screen built in v1.5. All 8 components complete except photo support (initial letter placeholder used, full photo is P4 gap).
+        </div>
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Belt progression timeline</td><td class="comp-desc">Visual history of belt levels earned</td><td class="st-built">✅ Built in v1.5</td></tr>
+            <tr><td class="comp-name">Current belt + stripe detail</td><td class="comp-desc">Full element badge breakdown</td><td class="st-built">✅ Built in v1.5</td></tr>
+            <tr><td class="comp-name">Session log</td><td class="comp-desc">Per-class attendance + performance notes</td><td class="st-built">✅ Built in v1.5</td></tr>
+            <tr><td class="comp-name">Instructor notes (read-only)</td><td class="comp-desc">What the instructor has recorded</td><td class="st-built">✅ Built in v1.5</td></tr>
+            <tr><td class="comp-name">Challenge history</td><td class="comp-desc">All past challenges set and completed</td><td class="st-built">✅ Built in v1.5</td></tr>
+            <tr><td class="comp-name">Aura stage indicator</td><td class="comp-desc">Current aura stage progress (in ARCHITECTURE.md)</td><td class="st-built">✅ Built in v1.5</td></tr>
+            <tr><td class="comp-name">Next milestone indicator</td><td class="comp-desc">What's needed for next belt/stripe</td><td class="st-built">✅ Built in v1.5</td></tr>
+            <tr><td class="comp-name">Student photo / avatar</td><td class="comp-desc">Visual personalisation</td><td class="st-partial">⚠️ Initial letter placeholder — full photo support is gap P4</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SETTINGS (MISSING) -->
+    <div class="screen-block missing-screen">
+      <div class="screen-head" onclick="toggleScreen(this)">
+        <div class="screen-icon">⚙️</div>
+        <div class="screen-head-text">
+          <div class="screen-name">2.8 — Settings Screen</div>
+          <div class="screen-purpose">App-level preferences, security, legal — absent from v1.3</div>
+        </div>
+        <div class="screen-badges">
+          <span class="badge missing">✕ Not built</span>
+          <span class="badge gap-count">7 components needed</span>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="screen-body">
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="comp-name">Notification preferences</td><td class="comp-desc">Toggle per notification type</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Passcode change</td><td class="comp-desc">Accessible from Settings as well as Account tab</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Biometric toggle</td><td class="comp-desc">Enable / disable Face ID / Touch ID</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">App version / legal</td><td class="comp-desc">About, T&Cs, Privacy Policy, GDPR data request</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Help / FAQ</td><td class="comp-desc">In-app support content</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Log out / switch family</td><td class="comp-desc">Session management</td><td class="st-missing">❌ Not built</td></tr>
+            <tr><td class="comp-name">Language / region</td><td class="comp-desc">Localisation (future)</td><td class="st-missing">❌ Not built</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 3. FLOWS -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="section" id="flows">
+    <div class="section-header">
+      <span class="section-number">03</span>
+      <h2 class="section-title">Navigation &amp; Interaction Flows</h2>
+    </div>
+
+    <div class="flow-diagram">
+<span class="flow-screen">LOCK SCREEN</span>
+  │
+  ├─ [correct passcode] ────────────────────► <span class="flow-screen">HOME</span>
+  │                                              │
+  │                                         [tap bell] ──► <span class="flow-screen">NOTIFICATIONS PANEL</span> (overlay)
+  │                                              │
+  │                                         [tap student card] ──► <span class="flow-screen">STUDENT PROFILE</span> <span class="flow-warn">⚠️ not built</span>
+  │                                              │
+  │                                         [challenge banner] ──► inline textarea / mark complete
+  │
+  └─ [tap student tile] ────────────────────► <span class="flow-screen">HOME</span>
+
+<span style="color: rgba(201,168,76,0.4);">─────────────────────────────────────────────────────</span>
+<span class="flow-screen">BOTTOM TAB BAR</span> <span class="flow-action">(persistent across all authenticated screens)</span>
+  HOME  ·  ATTENDANCE  ·  FAMILY ACCOUNT  ·  BILLING  ·  SHOP
+
+<span style="color: rgba(201,168,76,0.4);">─────────────────────────────────────────────────────</span>
+<span class="flow-screen">FAMILY ACCOUNT</span>
+  ├─ Students tab
+  │   ├─ [tap student card] ──► <span class="flow-screen">STUDENT PROFILE</span> <span class="flow-warn">⚠️ not built</span>
+  │   ├─ [pause] ──► Confirmation Modal ──► soft pause (8-week hold)
+  │   └─ [add new student] ──► inline form ──► enrolment request <span class="flow-warn">⚠️ not wired</span>
+  │
+  ├─ Account tab
+  │   └─ [edit details] ──► Edit Guardian form <span class="flow-warn">⚠️ partial</span>
+  │
+  └─ Class Transfer tab
+      └─ [request transfer] ──► instructor notified ──► pending state <span class="flow-warn">⚠️ not built</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 4. DATA MODEL -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="section" id="data">
+    <div class="section-header">
+      <span class="section-number">04</span>
+      <h2 class="section-title">Data Model — Entities Surfaced in UI</h2>
+    </div>
+    <div class="data-grid">
+      <div class="entity-card">
+        <div class="entity-name">Family</div>
+        <div class="entity-fields">family_id<br>family_name<br>passcode (hashed)</div>
+        <div class="entity-source">→ Family Account</div>
+      </div>
+      <div class="entity-card">
+        <div class="entity-name">Guardian</div>
+        <div class="entity-fields">guardian_id · name · role<br>email · phone<br>emergency_contact<br>notification_pref</div>
+        <div class="entity-source">→ Account tab</div>
+      </div>
+      <div class="entity-card">
+        <div class="entity-name">Student</div>
+        <div class="entity-fields">student_id · full_name · dob<br>age (calc) · belt · element_stripes<br>status · class_schedule<br>membership_type</div>
+        <div class="entity-source">→ Student cards, Lock screen</div>
+      </div>
+      <div class="entity-card">
+        <div class="entity-name">Belt</div>
+        <div class="entity-fields">belt_id<br>belt_name<br>belt_colour</div>
+        <div class="entity-source">→ Student card, Lock screen</div>
+      </div>
+      <div class="entity-card">
+        <div class="entity-name">Element Stripe</div>
+        <div class="entity-fields">stripe_id<br>element (Air/Earth/Water/Fire)<br>state (Full/Half/Ghost)</div>
+        <div class="entity-source">→ Student card (28px SVG)</div>
+      </div>
+      <div class="entity-card">
+        <div class="entity-name">Class</div>
+        <div class="entity-fields">class_id · class_name<br>instructor · schedule<br>capacity (30 max) · age_range</div>
+        <div class="entity-source">→ Attendance, Transfer</div>
+      </div>
+      <div class="entity-card">
+        <div class="entity-name">Attendance Record</div>
+        <div class="entity-fields">attendance_id · student_id<br>class_id · reported_at<br>status (Present/Absent/Late/Make-Up)</div>
+        <div class="entity-source">→ Attendance screen</div>
+      </div>
+      <div class="entity-card">
+        <div class="entity-name">Make-Up Booking</div>
+        <div class="entity-fields">makeup_id · absence_id<br>student_id · class_id<br>term_id · confirmed_at</div>
+        <div class="entity-source">→ Make-Up tab</div>
+      </div>
+      <div class="entity-card">
+        <div class="entity-name">Challenge</div>
+        <div class="entity-fields">challenge_id · student_id<br>description · confirmed (bool)<br>confirmed_at</div>
+        <div class="entity-source">→ Home / Challenge banner</div>
+      </div>
+      <div class="entity-card">
+        <div class="entity-name">Notification</div>
+        <div class="entity-fields">notification_id · guardian_id<br>type · body<br>read_at (nullable) · created_at</div>
+        <div class="entity-source">→ Notifications panel</div>
+      </div>
+      <div class="entity-card">
+        <div class="entity-name">Term</div>
+        <div class="entity-fields">term_id · term_name<br>start_date · end_date</div>
+        <div class="entity-source">→ Home hero</div>
+      </div>
+      <div class="entity-card">
+        <div class="entity-name">Membership</div>
+        <div class="entity-fields">membership_id · student_id<br>type (Monthly Rolling/Termly)<br>monthly_cost · status</div>
+        <div class="entity-source">→ Billing, Student card</div>
+      </div>
+      <div class="entity-card">
+        <div class="entity-name">Payment</div>
+        <div class="entity-fields">payment_id · family_id<br>amount · date · stripe_token</div>
+        <div class="entity-source">→ Billing screen</div>
+      </div>
+      <div class="entity-card">
+        <div class="entity-name">Consent Document</div>
+        <div class="entity-fields">consent_id<br>student_id / guardian_id<br>type · signed_date · status</div>
+        <div class="entity-source">→ Account tab</div>
+      </div>
+      <div class="entity-card">
+        <div class="entity-name">Transfer Request</div>
+        <div class="entity-fields">transfer_id · student_id<br>from_class_id · to_class_id<br>reason · status · created_at</div>
+        <div class="entity-source">→ Class Transfer tab</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 5. GAP ANALYSIS -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="section" id="gaps">
+    <div class="section-header">
+      <span class="section-number">05</span>
+      <h2 class="section-title">Quality-of-Life Gap Analysis</h2>
+    </div>
+    <p class="prose">Every identified gap mapped to priority and screen. This is the working list for moving from Stage 1 prototype to integration-ready.</p>
+
+    <!-- CRITICAL -->
+    <div class="gaps-section">
+      <div class="gaps-head">
+        <div class="priority-badge critical">🔴</div>
+        <div>
+          <div class="gaps-title">Critical — App cannot ship without these</div>
+        </div>
+        <div class="gaps-subtitle">10 items</div>
+      </div>
+      <table class="gaps-table">
+        <thead><tr><th>ID</th><th>Gap</th><th>Screen</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><span class="gap-id c">C1</span></td><td class="gap-title">Real authentication backend</td><td><span class="gap-screen">Lock Screen</span></td><td class="gap-notes">Passcode must be validated server-side; session tokens needed</td></tr>
+          <tr><td><span class="gap-id c">C2</span></td><td class="gap-title">Session management (timeout, auto-lock)</td><td><span class="gap-screen">Global</span></td><td class="gap-notes">Re-lock after inactivity; token expiry</td></tr>
+          <tr><td><span class="gap-id c">C3</span></td><td class="gap-title">Student Profile screen</td><td><span class="gap-screen">Home, Family Account</span></td><td class="gap-notes">Referenced everywhere; not built at all — ✅ Built in v1.5 (2026-03-31)</td></tr>
+          <tr><td><span class="gap-id c">C4</span></td><td class="gap-title">Empty states for all screens</td><td><span class="gap-screen">All</span></td><td class="gap-notes">No classes, no notifications, new account — ✅ Built in v1.4</td></tr>
+          <tr><td><span class="gap-id c">C5</span></td><td class="gap-title">Error states for all forms and actions</td><td><span class="gap-screen">All</span></td><td class="gap-notes">Network errors, validation failures, server errors — ✅ Built in v1.4</td></tr>
+          <tr><td><span class="gap-id c">C6</span></td><td class="gap-title">Loading / skeleton states</td><td><span class="gap-screen">All</span></td><td class="gap-notes">Data fetching indicators needed throughout — ✅ Built in v1.4</td></tr>
+          <tr><td><span class="gap-id c">C7</span></td><td class="gap-title">Attendance "already reported" guard</td><td><span class="gap-screen">Attendance</span></td><td class="gap-notes">Prevent duplicate attendance submissions — ✅ Built in v1.5 (2026-03-31)</td></tr>
+          <tr><td><span class="gap-id c">C8</span></td><td class="gap-title">Make-up date selection</td><td><span class="gap-screen">Attendance</span></td><td class="gap-notes">Can't book a make-up without choosing a date — ✅ Built in v1.5 (2026-03-31)</td></tr>
+          <tr><td><span class="gap-id c">C9</span></td><td class="gap-title">Instructor notification wiring</td><td><span class="gap-screen">Attendance, Home, Account</span></td><td class="gap-notes">All backend event triggers need to be live</td></tr>
+          <tr><td><span class="gap-id c">C10</span></td><td class="gap-title">Passcode lockout after N failed attempts</td><td><span class="gap-screen">Lock Screen</span></td><td class="gap-notes">Phase 2 flag in spec — ✅ Built in v1.4</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- HIGH -->
+    <div class="gaps-section">
+      <div class="gaps-head">
+        <div class="priority-badge high">🟠</div>
+        <div>
+          <div class="gaps-title">High — Needed for a complete parent experience</div>
+        </div>
+        <div class="gaps-subtitle">14 items</div>
+      </div>
+      <table class="gaps-table">
+        <thead><tr><th>ID</th><th>Gap</th><th>Screen</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><span class="gap-id h">H1</span></td><td class="gap-title">Edit guardian details form</td><td><span class="gap-screen">Family Account → Account</span></td><td class="gap-notes">Form fields partially spec'd; not built</td></tr>
+          <tr><td><span class="gap-id h">H2</span></td><td class="gap-title">Change passcode flow</td><td><span class="gap-screen">Family Account → Account</span></td><td class="gap-notes">Referenced but implementation unclear</td></tr>
+          <tr><td><span class="gap-id h">H3</span></td><td class="gap-title">Edit existing student details</td><td><span class="gap-screen">Family Account → Students</span></td><td class="gap-notes">Currently no way to correct student info after enrolment</td></tr>
+          <tr><td><span class="gap-id h">H4</span></td><td class="gap-title">Student re-activate (un-pause) flow</td><td><span class="gap-screen">Family Account → Students</span></td><td class="gap-notes">Pause exists; un-pause does not</td></tr>
+          <tr><td><span class="gap-id h">H5</span></td><td class="gap-title">Transfer pending / approved / rejected states</td><td><span class="gap-screen">Family Account → Transfer</span></td><td class="gap-notes">Parent left hanging after submitting request</td></tr>
+          <tr><td><span class="gap-id h">H6</span></td><td class="gap-title">Notification preferences</td><td><span class="gap-screen">Account, Settings</span></td><td class="gap-notes">Which notification types can be toggled</td></tr>
+          <tr><td><span class="gap-id h">H7</span></td><td class="gap-title">Push notification permission flow</td><td><span class="gap-screen">Global</span></td><td class="gap-notes">iOS/Android permission request on first launch</td></tr>
+          <tr><td><span class="gap-id h">H8</span></td><td class="gap-title">Real-time notification delivery</td><td><span class="gap-screen">Notifications Panel</span></td><td class="gap-notes">No websocket/polling — notifications are currently static</td></tr>
+          <tr><td><span class="gap-id h">H9</span></td><td class="gap-title">Upcoming payment preview</td><td><span class="gap-screen">Billing</span></td><td class="gap-notes">Next charge date + amount before it hits</td></tr>
+          <tr><td><span class="gap-id h">H10</span></td><td class="gap-title">Failed payment alert + recovery flow</td><td><span class="gap-screen">Billing</span></td><td class="gap-notes">Critical for any subscription model</td></tr>
+          <tr><td><span class="gap-id h">H11</span></td><td class="gap-title">Stripe integration (live)</td><td><span class="gap-screen">Billing</span></td><td class="gap-notes">Payment display only; no live Stripe calls</td></tr>
+          <tr><td><span class="gap-id h">H12</span></td><td class="gap-title">Passcode lockout</td><td><span class="gap-screen">Lock Screen</span></td><td class="gap-notes">Elevated due to family data sensitivity</td></tr>
+          <tr><td><span class="gap-id h">H13</span></td><td class="gap-title">Settings screen</td><td><span class="gap-screen">Global</span></td><td class="gap-notes">Notification prefs, biometrics, legal, logout</td></tr>
+          <tr><td><span class="gap-id h">H14</span></td><td class="gap-title">"Forgot passcode" / recovery</td><td><span class="gap-screen">Lock Screen</span></td><td class="gap-notes">No path out of a forgotten passcode</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- MEDIUM -->
+    <div class="gaps-section">
+      <div class="gaps-head">
+        <div class="priority-badge medium">🟡</div>
+        <div>
+          <div class="gaps-title">Medium — Quality of life; expected by parents</div>
+        </div>
+        <div class="gaps-subtitle">15 items</div>
+      </div>
+      <table class="gaps-table">
+        <thead><tr><th>ID</th><th>Gap</th><th>Screen</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><span class="gap-id m">M1</span></td><td class="gap-title">Filter attendance history by student</td><td><span class="gap-screen">Attendance → History</span></td><td class="gap-notes">Multi-student families need this badly</td></tr>
+          <tr><td><span class="gap-id m">M2</span></td><td class="gap-title">Challenge history view</td><td><span class="gap-screen">Home / Student Profile</span></td><td class="gap-notes">Previous challenges: what was set, when completed</td></tr>
+          <tr><td><span class="gap-id m">M3</span></td><td class="gap-title">Belt progression timeline</td><td><span class="gap-screen">Student Profile</span></td><td class="gap-notes">Key motivational feature for parents</td></tr>
+          <tr><td><span class="gap-id m">M4</span></td><td class="gap-title">Aura stage progress</td><td><span class="gap-screen">Student Profile</span></td><td class="gap-notes">Referenced in ARCHITECTURE.md but not visible to parent</td></tr>
+          <tr><td><span class="gap-id m">M5</span></td><td class="gap-title">"Next milestone" indicator</td><td><span class="gap-screen">Student Profile</span></td><td class="gap-notes">What does my child need for their next belt/stripe?</td></tr>
+          <tr><td><span class="gap-id m">M6</span></td><td class="gap-title">Tier comparison view (Upgrade)</td><td><span class="gap-screen">Billing</span></td><td class="gap-notes">Button present; destination screen not built</td></tr>
+          <tr><td><span class="gap-id m">M7</span></td><td class="gap-title">Invoice download per payment</td><td><span class="gap-screen">Billing</span></td><td class="gap-notes">Parents often need receipts for expenses</td></tr>
+          <tr><td><span class="gap-id m">M8</span></td><td class="gap-title">Consent document re-sign flow</td><td><span class="gap-screen">Family Account → Account</span></td><td class="gap-notes">Consents expire or change; no refresh flow</td></tr>
+          <tr><td><span class="gap-id m">M9</span></td><td class="gap-title">Add / remove second guardian</td><td><span class="gap-screen">Family Account → Account</span></td><td class="gap-notes">Family circumstances change</td></tr>
+          <tr><td><span class="gap-id m">M10</span></td><td class="gap-title">Role-based actions (Primary vs Guardian)</td><td><span class="gap-screen">Family Account</span></td><td class="gap-notes">Secondary guardians may need limited permissions</td></tr>
+          <tr><td><span class="gap-id m">M11</span></td><td class="gap-title">Shop basket + checkout</td><td><span class="gap-screen">Shop</span></td><td class="gap-notes">Currently all CTAs lead nowhere</td></tr>
+          <tr><td><span class="gap-id m">M12</span></td><td class="gap-title">Camp booking flow</td><td><span class="gap-screen">Shop</span></td><td class="gap-notes">Requires date picker, student assignment, consent</td></tr>
+          <tr><td><span class="gap-id m">M13</span></td><td class="gap-title">"Register Interest" capture</td><td><span class="gap-screen">Shop</span></td><td class="gap-notes">Form + confirmation for waitlisted items</td></tr>
+          <tr><td><span class="gap-id m">M14</span></td><td class="gap-title">Biometric auth (Face ID / Touch ID)</td><td><span class="gap-screen">Lock Screen</span></td><td class="gap-notes">Standard expectation for any family app</td></tr>
+          <tr><td><span class="gap-id m">M15</span></td><td class="gap-title">Calendar view for upcoming classes</td><td><span class="gap-screen">Attendance → Upcoming</span></td><td class="gap-notes">List is functional; calendar is more intuitive</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- POLISH -->
+    <div class="gaps-section">
+      <div class="gaps-head">
+        <div class="priority-badge polish">🟢</div>
+        <div>
+          <div class="gaps-title">Polish — Makes it feel finished and professional</div>
+        </div>
+        <div class="gaps-subtitle">15 items</div>
+      </div>
+      <table class="gaps-table">
+        <thead><tr><th>ID</th><th>Gap</th><th>Screen</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><span class="gap-id p">P1</span></td><td class="gap-title">Passcode lockout visual (countdown / locked state)</td><td><span class="gap-screen">Lock Screen</span></td><td class="gap-notes">Matches spec's Phase 2 flag</td></tr>
+          <tr><td><span class="gap-id p">P2</span></td><td class="gap-title">Inactive student visual distinction</td><td><span class="gap-screen">Home, Family Account</span></td><td class="gap-notes">Paused students should look clearly different</td></tr>
+          <tr><td><span class="gap-id p">P3</span></td><td class="gap-title">Stripe detail on Lock Screen student tiles</td><td><span class="gap-screen">Lock Screen</span></td><td class="gap-notes">Currently only shown post-login</td></tr>
+          <tr><td><span class="gap-id p">P4</span></td><td class="gap-title">Student photo / avatar support</td><td><span class="gap-screen">Student Profile, cards</span></td><td class="gap-notes">Nice-to-have visual personalisation</td></tr>
+          <tr><td><span class="gap-id p">P5</span></td><td class="gap-title">Attendance export (PDF/CSV)</td><td><span class="gap-screen">Attendance → History</span></td><td class="gap-notes">Parents may want records for school absences</td></tr>
+          <tr><td><span class="gap-id p">P6</span></td><td class="gap-title">Order history in Shop</td><td><span class="gap-screen">Shop</span></td><td class="gap-notes">Post-purchase receipts and re-order</td></tr>
+          <tr><td><span class="gap-id p">P7</span></td><td class="gap-title">Transfer history log</td><td><span class="gap-screen">Family Account → Transfer</span></td><td class="gap-notes">Audit trail for past class moves</td></tr>
+          <tr><td><span class="gap-id p">P8</span></td><td class="gap-title">In-app messaging (parent ↔ instructor)</td><td><span class="gap-screen">Global (new screen)</span></td><td class="gap-notes">Listed as backlog in WORKFLOW.md</td></tr>
+          <tr><td><span class="gap-id p">P9</span></td><td class="gap-title">Onboarding / first-run flow</td><td><span class="gap-screen">Global</span></td><td class="gap-notes">No tutorial or welcome experience</td></tr>
+          <tr><td><span class="gap-id p">P10</span></td><td class="gap-title">Help / FAQ section</td><td><span class="gap-screen">Settings</span></td><td class="gap-notes">In-app support to reduce admin load</td></tr>
+          <tr><td><span class="gap-id p">P11</span></td><td class="gap-title">GDPR data request + deletion</td><td><span class="gap-screen">Settings / Account</span></td><td class="gap-notes">Legal requirement before launch in UK</td></tr>
+          <tr><td><span class="gap-id p">P12</span></td><td class="gap-title">App version, T&Cs, Privacy Policy</td><td><span class="gap-screen">Settings</span></td><td class="gap-notes">Legal baseline for any app store release</td></tr>
+          <tr><td><span class="gap-id p">P13</span></td><td class="gap-title">Product detail / expanded view</td><td><span class="gap-screen">Shop</span></td><td class="gap-notes">Tapping a product just highlights; no drill-down</td></tr>
+          <tr><td><span class="gap-id p">P14</span></td><td class="gap-title">Dark mode support</td><td><span class="gap-screen">Global</span></td><td class="gap-notes">Single theme only; increasingly expected</td></tr>
+          <tr><td><span class="gap-id p">P15</span></td><td class="gap-title">Accessibility (WCAG 2.1 AA)</td><td><span class="gap-screen">Global</span></td><td class="gap-notes">No colour contrast ratios, alt text, or focus states defined</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 6. SUMMARY -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="section" id="summary">
+    <div class="section-header">
+      <span class="section-number">06</span>
+      <h2 class="section-title">Screens Summary</h2>
+    </div>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Screen</th>
+          <th>Build Status</th>
+          <th>Critical Gaps</th>
+          <th>Total Gaps</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="screen-cell">🔒 Lock Screen</td>
+          <td><span class="badge built">✓ Core UI</span></td>
+          <td>Auth backend, lockout, biometrics</td>
+          <td><span class="gap-pill total">5</span></td>
+        </tr>
+        <tr>
+          <td class="screen-cell">🏠 Home</td>
+          <td><span class="badge built">✓ Core UI</span></td>
+          <td>Student Profile drill-down, empty states</td>
+          <td><span class="gap-pill total">8</span></td>
+        </tr>
+        <tr>
+          <td class="screen-cell">📋 Attendance</td>
+          <td><span class="badge built">✓ Core UI</span></td>
+          <td>Backend wiring</td>
+          <td><span class="gap-pill total">8</span></td>
+        </tr>
+        <tr>
+          <td class="screen-cell">👨‍👩‍👧 Family Account</td>
+          <td><span class="badge built">✓ Core UI</span></td>
+          <td>Edit forms, transfer states, guardian management</td>
+          <td><span class="gap-pill total">12</span></td>
+        </tr>
+        <tr>
+          <td class="screen-cell">💳 Billing</td>
+          <td><span class="badge built">✓ Core UI</span></td>
+          <td>Stripe live, failed payment, invoice download</td>
+          <td><span class="gap-pill total">8</span></td>
+        </tr>
+        <tr>
+          <td class="screen-cell">🛍️ Shop</td>
+          <td><span class="badge built">✓ Core UI</span></td>
+          <td>Basket, checkout, product detail</td>
+          <td><span class="gap-pill total">7</span></td>
+        </tr>
+        <tr>
+          <td class="screen-cell">🧑‍🎓 Student Profile</td>
+          <td><span class="badge built">✓ Built (v1.5)</span></td>
+          <td>Photo support</td>
+          <td><span class="gap-pill crit">8 needed</span></td>
+        </tr>
+        <tr>
+          <td class="screen-cell not-built">⚙️ Settings</td>
+          <td><span class="badge missing">✕ Not built</span></td>
+          <td>Entire screen to be created</td>
+          <td><span class="gap-pill crit">7 needed</span></td>
+        </tr>
+        <tr>
+          <td class="screen-cell not-built">💬 In-App Messaging</td>
+          <td><span class="badge missing">✕ Not built</span></td>
+          <td>Backlog item</td>
+          <td><span class="gap-pill crit">—</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 7. INTEGRATION DEPS -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="section" id="deps">
+    <div class="section-header">
+      <span class="section-number">07</span>
+      <h2 class="section-title">Integration Dependencies</h2>
+    </div>
+    <p class="prose">These items cannot be resolved within the parent app alone — they require coordination with other sections of the master project.</p>
+
+    <div class="dep-grid">
+      <div class="dep-card">
+        <div class="dep-title">Instructor grades student</div>
+        <div class="dep-touch">→ Notification panel, challenge banner trigger</div>
+        <span class="dep-link">_SHARED/integration/ — instructor grading flow</span>
+      </div>
+      <div class="dep-card">
+        <div class="dep-title">Student profile data</div>
+        <div class="dep-touch">→ Student cards, Student Profile screen (belt, stripes, aura)</div>
+        <span class="dep-link">_SHARED/ — Student data spec</span>
+      </div>
+      <div class="dep-card">
+        <div class="dep-title">Class capacity data</div>
+        <div class="dep-touch">→ Make-up class list, Transfer tab</div>
+        <span class="dep-link">Instructor / admin section</span>
+      </div>
+      <div class="dep-card">
+        <div class="dep-title">Notification schema</div>
+        <div class="dep-touch">→ Notifications panel feed</div>
+        <span class="dep-link">_SHARED/integration/ — notification events</span>
+      </div>
+      <div class="dep-card">
+        <div class="dep-title">Consent form delivery + signature</div>
+        <div class="dep-touch">→ Add student, Account tab</div>
+        <span class="dep-link">Admin / legal section</span>
+      </div>
+      <div class="dep-card">
+        <div class="dep-title">Stripe token management</div>
+        <div class="dep-touch">→ Billing screen</div>
+        <span class="dep-link">Backend / payment service</span>
+      </div>
+      <div class="dep-card">
+        <div class="dep-title">Push notification delivery</div>
+        <div class="dep-touch">→ All event triggers throughout app</div>
+        <span class="dep-link">Device + backend push service</span>
+      </div>
+      <div class="dep-card">
+        <div class="dep-title">Transfer approval workflow</div>
+        <div class="dep-touch">→ Class Transfer tab</div>
+        <span class="dep-link">Instructor section</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- 8. BUILD ORDER -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="section" id="build">
+    <div class="section-header">
+      <span class="section-number">08</span>
+      <h2 class="section-title">Recommended Build Order</h2>
+    </div>
+    <p class="prose">Based on priority and dependency chain — the suggested sequence for moving to integration-ready.</p>
+
+    <div class="phases">
+      <div class="phase-card a">
+        <div class="phase-title">Phase A</div>
+        <div class="phase-sub">Foundation — before any integration</div>
+        <ol class="phase-items">
+          <li>Real auth + session management <code>C1, C2</code></li>
+          <li>Empty states across all screens <code>C4</code></li>
+          <li>Error + loading states <code>C5, C6</code></li>
+          <li>Passcode lockout <code>C10</code></li>
+        </ol>
+      </div>
+      <div class="phase-card b">
+        <div class="phase-title">Phase B</div>
+        <div class="phase-sub">Core completeness</div>
+        <ol class="phase-items">
+          <li>Student Profile screen <code>C3</code></li>
+          <li>Edit guardian details + change passcode <code>H1, H2</code></li>
+          <li>Edit student + re-activate <code>H3, H4</code></li>
+          <li>Make-up date picker + duplicate guard <code>C7, C8</code></li>
+          <li>Transfer states (pending/approved/rejected) <code>H5</code></li>
+          <li>Settings screen <code>H13</code></li>
+        </ol>
+      </div>
+      <div class="phase-card c">
+        <div class="phase-title">Phase C</div>
+        <div class="phase-sub">Live integration</div>
+        <ol class="phase-items">
+          <li>Backend auth wiring</li>
+          <li>Real-time notifications + preferences <code>H6, H7, H8</code></li>
+          <li>Attendance instructor event triggers <code>C9</code></li>
+          <li>Stripe live billing <code>H9, H10, H11</code></li>
+        </ol>
+      </div>
+      <div class="phase-card d">
+        <div class="phase-title">Phase D</div>
+        <div class="phase-sub">Polish + launch-ready</div>
+        <ol class="phase-items">
+          <li>Student Profile rich content <code>M3, M4, M5</code></li>
+          <li>Shop basket + checkout <code>M11, M12, M13</code></li>
+          <li>Biometrics, GDPR, legal <code>M14, P11, P12</code></li>
+          <li>Accessibility audit <code>P15</code></li>
+          <li>In-app messaging <code>P8</code></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Build Log</h2>
+    </div>
+    <table class="gaps-table">
+      <thead><tr><th>Date</th><th>Version</th><th>Gaps Closed</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>2026-03-31</td><td>v1.4</td><td>C4, C5, C6, C10</td><td>Phase A foundation: empty states, error states, loading/skeleton states, passcode lockout. Tester approved with notes. Minor fixes applied (font stack, error banner pre-render, HTML close tag, transfer form inline error). C7 (attendance duplicate guard) and C8 (make-up date picker) confirmed as Phase B items.</td></tr>
+        <tr><td>2026-03-31</td><td>v1.5</td><td>C3, C7, C8</td><td>Phase B (partial): Student Profile screen (all 8 components), make-up date picker, attendance duplicate guard with undo. Tester: clean APPROVE, no issues.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <strong>ParentNinja</strong> — UI Architecture Map · Last updated 2026-03-31 · v1.5 · Working source of truth for the Parent App
+</footer>
+
+<script>
+  function toggleScreen(head) {
+    const body = head.nextElementSibling;
+    const isOpen = body.classList.contains('open');
+    if (isOpen) {
+      body.classList.remove('open');
+      head.classList.remove('open');
+    } else {
+      body.classList.add('open');
+      head.classList.add('open');
+    }
+  }
+
+  // highlight active nav on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.style.color = '');
+        const active = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+        if (active) active.style.color = 'var(--dark)';
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
