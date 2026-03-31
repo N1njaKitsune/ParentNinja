@@ -277,7 +277,7 @@
     transition: all 0.15s;
   }
   .passcode-dot.filled { background: var(--gold); border-color: var(--gold); }
-  .passcode-dot.error { background: var(--danger); border-color: var(--danger); }
+  .passcode-dot.error { background: #E53E3E; border-color: #E53E3E; }
   .numpad {
     display: grid;
     grid-template-columns: repeat(3, 72px);
@@ -417,6 +417,27 @@
   }
   .stripe-pip.earned { background: var(--gold); }
   .stripe-pip.half { background: linear-gradient(90deg, var(--gold) 50%, var(--fog) 50%); }
+
+
+  /* Student Profile hero section */
+  .hero-section {
+    background: var(--ink);
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .back-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.75);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .back-btn:hover { color: #fff; }
 
   /* ===== HOME SCREEN ===== */
   #screen-home {
@@ -1146,7 +1167,7 @@
 
 <!-- =================== PHONE SHELL =================== -->
 <div class="phone" id="app">
-  <button onclick="window.location.href='index.html'" style="position:absolute;top:52px;left:14px;z-index:500;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:rgba(255,255,255,0.8);cursor:pointer;display:flex;align-items:center;gap:4px;">‹ Demo</button>
+  <button onclick="showScreen('screen-lock')" style="position:absolute;top:52px;left:14px;z-index:500;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:rgba(255,255,255,0.8);cursor:pointer;display:flex;align-items:center;gap:4px;">‹ Demo</button>
 
   <!-- =================== LOCK SCREEN =================== -->
   <div class="screen active" id="screen-lock">
@@ -1350,7 +1371,7 @@
 
       <!-- Students overview -->
       <div style="padding: 0 20px;">
-        <div class="student-overview-card" onclick="showAttendanceFor('Kai')">
+        <div class="student-overview-card" onclick="showStudentProfile('kai')">
           <div class="soc-avatar" style="background:#F0C830;">K</div>
           <div style="flex:1;">
             <div class="soc-name">Kai Gunn</div>
@@ -1395,7 +1416,7 @@
           <div class="chevron light" style="margin-top:10px;"></div>
         </div>
 
-        <div class="student-overview-card" onclick="showAttendanceFor('Mia')">
+        <div class="student-overview-card" onclick="showStudentProfile('mia')">
           <div class="soc-avatar" style="background:#A8D8F0;">M</div>
           <div style="flex:1;">
             <div class="soc-name">Mia Gunn</div>
@@ -2391,7 +2412,7 @@ function checkPasscode() {
   } else {
     for (let i = 0; i < 4; i++) {
       const dot = document.querySelector(`.passcode-dot[data-index="${i}"]`);
-      if (dot) dot.classList.replace('filled', 'error');
+      if (dot) { dot.classList.remove('filled'); dot.classList.add('error'); }
     }
     recordFailedAttempt();
     setTimeout(() => {
